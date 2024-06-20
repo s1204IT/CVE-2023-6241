@@ -1,0 +1,31 @@
+name: Compile
+
+on:
+  push:
+    paths:
+      - '*.c'
+      - '*.h'
+      - '*.so'
+      - '.github/workflows/compile.yml'
+  workflow_dispatch:
+
+jobs:
+  compile:
+    name: Compile
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install OpenCL headers
+        run: sudo apt-get install -y opencl-headers
+
+      - name: Compile
+        run: $ANDROID_NDK_LATEST_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android34-clang -DSHELL -DCL_TARGET_OPENCL_VERSION=300 -I. -L. mali_jit_csf.c mem_read_write.c mempool_utils.c -lGLES_mali -o mali_jit_csf
+
+      - name: Uplaod
+        uses: actions/upload-artifact@v4
+        with:
+          name: CVE-2023-6241
+          path: mali_jit_csf
